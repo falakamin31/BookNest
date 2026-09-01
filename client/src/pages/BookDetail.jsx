@@ -1,4 +1,5 @@
-import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
 const dummyBook = {
     id: 1,
@@ -13,6 +14,27 @@ const dummyBook = {
 
 const BookDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+
+    const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleEdit = () => {
+        navigate(`/edit-book/${id}`);
+        // Note: /edit-book/:id route abhi banana baaki hai agar Edit page alag chahiye
+    };
+
+    const handleDelete = () => {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this book?",
+        );
+        if (!confirmed) return;
+
+        setDeleting(true);
+        console.log("Deleting book with id:", id);
+        // API call yahan baad mein aayegi
+        setDeleting(false);
+    };
 
     return (
         <div className="max-w-4xl mx-auto px-6 py-10">
@@ -23,8 +45,13 @@ const BookDetail = () => {
                 ← Back to books
             </Link>
 
+            {error && (
+                <p className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-2.5 mt-4">
+                    {error}
+                </p>
+            )}
+
             <div className="grid md:grid-cols-3 gap-10 mt-6 items-start">
-                {/* Cover image */}
                 <div className="md:col-span-1">
                     <div className="aspect-[3/4] rounded-xl overflow-hidden bg-surface border border-white/10">
                         <img
@@ -35,7 +62,6 @@ const BookDetail = () => {
                     </div>
                 </div>
 
-                {/* Details */}
                 <div className="md:col-span-2 flex flex-col gap-4">
                     <div>
                         <h1 className="font-heading text-3xl font-bold text-white">
@@ -54,17 +80,19 @@ const BookDetail = () => {
                         {dummyBook.description}
                     </p>
 
-                    <p className="text-xs text-gray-500">
-                        Viewing book ID: {id}
-                    </p>
-
-                    {/* Owner-only actions - will be conditional later */}
                     <div className="flex gap-3 mt-4">
-                        <button className="bg-surface border border-white/10 hover:border-primary text-white px-6 py-2.5 rounded-lg transition-colors">
+                        <button
+                            onClick={handleEdit}
+                            className="bg-surface border border-white/10 hover:border-primary text-white px-6 py-2.5 rounded-lg transition-colors"
+                        >
                             Edit
                         </button>
-                        <button className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 px-6 py-2.5 rounded-lg transition-colors">
-                            Delete
+                        <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                            {deleting ? "Deleting..." : "Delete"}
                         </button>
                     </div>
                 </div>
