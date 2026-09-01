@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuh";
 
 const dummyBook = {
     id: 1,
@@ -15,13 +16,15 @@ const dummyBook = {
 const BookDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
 
+    const isOwner = user && dummyBook.createdBy === user.id;
+
     const handleEdit = () => {
         navigate(`/edit-book/${id}`);
-        // Note: /edit-book/:id route abhi banana baaki hai agar Edit page alag chahiye
     };
 
     const handleDelete = () => {
@@ -32,7 +35,6 @@ const BookDetail = () => {
 
         setDeleting(true);
         console.log("Deleting book with id:", id);
-        // API call yahan baad mein aayegi
         setDeleting(false);
     };
 
@@ -80,21 +82,23 @@ const BookDetail = () => {
                         {dummyBook.description}
                     </p>
 
-                    <div className="flex gap-3 mt-4">
-                        <button
-                            onClick={handleEdit}
-                            className="bg-surface border border-white/10 hover:border-primary text-white px-6 py-2.5 rounded-lg transition-colors"
-                        >
-                            Edit
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            {deleting ? "Deleting..." : "Delete"}
-                        </button>
-                    </div>
+                    {isOwner && (
+                        <div className="flex gap-3 mt-4">
+                            <button
+                                onClick={handleEdit}
+                                className="bg-surface border border-white/10 hover:border-primary text-white px-6 py-2.5 rounded-lg transition-colors"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                {deleting ? "Deleting..." : "Delete"}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

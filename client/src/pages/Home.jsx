@@ -1,37 +1,24 @@
+import { useEffect, useState } from "react";
 import { BookCard } from "../components";
 
-const dummyBooks = [
-    {
-        id: 1,
-        title: "The Midnight Library",
-        authorName: "Matt Haig",
-        price: 14.99,
-        imageUrl: "https://covers.openlibrary.org/b/id/10389359-L.jpg",
-    },
-    {
-        id: 2,
-        title: "Atomic Habits",
-        authorName: "James Clear",
-        price: 18.5,
-        imageUrl: "https://covers.openlibrary.org/b/id/8383052-L.jpg",
-    },
-    {
-        id: 3,
-        title: "Project Hail Mary",
-        authorName: "Andy Weir",
-        price: 16.0,
-        imageUrl: "https://covers.openlibrary.org/b/id/10909258-L.jpg",
-    },
-    {
-        id: 4,
-        title: "Educated",
-        authorName: "Tara Westover",
-        price: 13.25,
-        imageUrl: "https://covers.openlibrary.org/b/id/8235116-L.jpg",
-    },
-];
 
 const Home = () => {
+    const [books, setBooks] = useState([]);
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                let response = await fetch(
+                    "http://localhost:8080/feed/books",
+                );
+                let data = await response.json();
+                console.log("Fetched books:", data);
+                setBooks(data.books);
+            } catch (err) {
+                console.error("Error fetching books:", err);
+            }
+        };
+        fetchBooks();
+    }, []);
     return (
         <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="mb-8">
@@ -44,7 +31,7 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                {dummyBooks.map((book) => (
+                {books.map((book) => (
                     <BookCard key={book.id} book={book} />
                 ))}
             </div>
