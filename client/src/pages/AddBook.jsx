@@ -1,13 +1,32 @@
 import { useState } from "react";
 
 const AddBook = () => {
+    const [formData, setFormData] = useState({
+        title: "",
+        authorName: "",
+        price: "",
+        description: "",
+    });
+    const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setImageFile(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log("Form data:", formData);
+        console.log("Image file:", imageFile);
+        // API call yahan baad mein aayegi
     };
 
     return (
@@ -21,7 +40,10 @@ const AddBook = () => {
                 </p>
             </div>
 
-            <form className="bg-surface rounded-2xl border border-white/10 shadow-xl shadow-black/20 p-8 md:p-10">
+            <form
+                onSubmit={handleSubmit}
+                className="bg-surface rounded-2xl border border-white/10 shadow-xl shadow-black/20 p-8 md:p-10"
+            >
                 <div className="grid md:grid-cols-3 gap-8 items-start">
                     {/* Left: cover upload */}
                     <div className="md:col-span-1">
@@ -66,7 +88,11 @@ const AddBook = () => {
                             </label>
                             <input
                                 type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
                                 placeholder="e.g. The Midnight Library"
+                                required
                                 className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                             />
                         </div>
@@ -77,7 +103,11 @@ const AddBook = () => {
                             </label>
                             <input
                                 type="text"
+                                name="authorName"
+                                value={formData.authorName}
+                                onChange={handleChange}
                                 placeholder="e.g. Matt Haig"
+                                required
                                 className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                             />
                         </div>
@@ -88,8 +118,12 @@ const AddBook = () => {
                             </label>
                             <input
                                 type="number"
+                                name="price"
                                 step="0.01"
+                                value={formData.price}
+                                onChange={handleChange}
                                 placeholder="14.99"
+                                required
                                 className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                             />
                         </div>
@@ -99,7 +133,10 @@ const AddBook = () => {
                                 Description
                             </label>
                             <textarea
+                                name="description"
                                 rows="4"
+                                value={formData.description}
+                                onChange={handleChange}
                                 placeholder="A short description of the book..."
                                 className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
                             />
