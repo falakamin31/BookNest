@@ -17,8 +17,25 @@ const Signup = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form submitted:", formData);
-        // API call yahan baad mein aayegi
-    };
+        
+        setLoading(true);
+        fetch("http://localhost:8080/auth/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Server response:", data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.log("Error:", err);
+                setLoading(false);
+            });
+    }
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-6">

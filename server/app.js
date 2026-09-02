@@ -6,7 +6,7 @@ const app = express();
 const mongoose = require("mongoose");
 
 const booksRoutes = require("./routes/feed");
-const upload = require("./util/multer");
+const authRoutes = require("./routes/auth");
 
 // for parsing json
 app.use(express.json());
@@ -37,6 +37,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", booksRoutes);
+app.use("/auth", authRoutes);
 
 mongoose.connect(process.env.MONGODB_URI).then((result) => {
     console.log("Connected to mongodb");
