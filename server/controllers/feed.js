@@ -1,5 +1,6 @@
 // GET /books
 const { validationResult } = require("express-validator");
+const Book = require("../models/book");
 exports.getBooks = (req, res, next) => {
     const dummyBooks = [
         {
@@ -17,6 +18,7 @@ exports.getBooks = (req, res, next) => {
             imageUrl: "https://covers.openlibrary.org/b/id/8383052-L.jpg",
         },
     ];
+
     res.status(200).json({
         books: dummyBooks,
     });
@@ -41,10 +43,23 @@ exports.createBook = (req, res, next) => {
     const description = req.body.description;
     const imageUrl = req.file.path;
 
-    const book = { title, imageUrl, authorName, price, description };
-
-    res.status(200).json({
-        message: "Book created successfully",
-        book: book,
+    const book = new Book({
+        title: title,
+        authorName: authorName,
+        price: price,
+        description: description,
+        imageUrl: imageUrl,
+        createdBy: "507f1f77bcf86cd799439011",
     });
+    return book
+        .save()
+        .then((result) => {
+            res.status(201).json({
+                message: "Book created successfully",
+                book: result,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };
