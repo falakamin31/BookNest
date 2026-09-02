@@ -26,7 +26,37 @@ const AddBook = () => {
         e.preventDefault();
         console.log("Form data:", formData);
         console.log("Image file:", imageFile);
-        // API call yahan baad mein aayegi
+
+        try {
+            // API call to submit the book data and image will go here
+            const formPayload = new FormData();
+            formPayload.append("title", formData.title);
+            formPayload.append("authorName", formData.authorName);
+            formPayload.append("price", formData.price);
+            formPayload.append("description", formData.description);
+            if (imageFile) {
+                formPayload.append("image", imageFile);
+            }
+            
+            fetch("http://localhost:8080/feed/book", {
+                body: formPayload,
+                method: "POST",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log("Server response:", data);
+                })
+                .catch((err) => {
+                    console.log("Error submitting book:", err);
+                });
+
+
+        }
+        catch(err) {
+            console.log("Error submitting book:", err);
+
+        }
+
     };
 
     return (

@@ -1,10 +1,29 @@
 const express = require("express");
+const upload = require("../util/multer");
+const { body } = require("express-validator");
+
 const router = express.Router();
 
 const booksController = require("../controllers/feed");
 
 router.get("/books", booksController.getBooks);
 
-router.post("/book", booksController.createBook);
+router.post(
+    "/book",
+    upload.single("image"),
+    [
+        body("title").trim().notEmpty().withMessage("Title is required"),
+        body("authorName")
+            .trim()
+            .notEmpty()
+            .withMessage("Author name is required"),
+        body("price")
+            .notEmpty()
+            .withMessage("Price is required")
+            .isFloat({ gt: 0 })
+            .withMessage("Price must be a positive number"),
+    ],
+    booksController.createBook,
+);
 
 module.exports = router;

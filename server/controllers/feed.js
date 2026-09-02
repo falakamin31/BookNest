@@ -1,4 +1,5 @@
 // GET /books
+const { validationResult } = require("express-validator");
 exports.getBooks = (req, res, next) => {
     const dummyBooks = [
         {
@@ -22,11 +23,26 @@ exports.getBooks = (req, res, next) => {
 };
 
 exports.createBook = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            message: "Validation failed",
+            errors: errors.array(),
+        });
+    }
+
+    if (!req.file) {
+        return res.status(422).json({ message: "No image provided" });
+    }
+
     const title = req.body.title;
-    const imageUrl = req.body.image;
     const authorName = req.body.authorName;
+    const price = req.body.price;
+    const description = req.body.description;
     const id = new Date().toISOString();
-    let book = { id, title, imageUrl, authorName };
+    const imageUrl = req.file.path;
+
+    const book = { id, title, imageUrl, authorName, price, description };
 
     res.status(200).json({
         message: "Book created successfully",
