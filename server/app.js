@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //  static folder taake images browser se access ho sakein
-app.use("images/", express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // CORS
 app.use((req, res, next) => {

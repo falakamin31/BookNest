@@ -10,7 +10,7 @@ const BookCard = ({ book }) => {
             <Link to={`/book/${book.id}`}>
                 <div className="aspect-[3/4] overflow-hidden bg-slate-800">
                     <img
-                        src={book.imageUrl}
+                        src={`http://localhost:8080/${book.imageUrl}`}
                         alt={book.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
