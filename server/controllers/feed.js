@@ -39,10 +39,9 @@ exports.createBook = (req, res, next) => {
     const authorName = req.body.authorName;
     const price = req.body.price;
     const description = req.body.description;
-    const id = new Date().toISOString();
     const imageUrl = req.file.path;
 
-    const book = { id, title, imageUrl, authorName, price, description };
+    const book = { title, imageUrl, authorName, price, description };
 
     res.status(200).json({
         message: "Book created successfully",
