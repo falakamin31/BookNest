@@ -1,6 +1,9 @@
 import { useState } from "react";
+import {useNavigate} from "react-router-dom";
 
 const AddBook = () => {
+    const navigate = useNavigate();
+    
     const [formData, setFormData] = useState({
         title: "",
         authorName: "",
@@ -45,6 +48,7 @@ const AddBook = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     console.log("Server response:", data);
+                    navigate("/"); // Redirect to home or another page after successful submission
                 })
                 .catch((err) => {
                     console.log("Error submitting book:", err);

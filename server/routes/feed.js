@@ -5,6 +5,7 @@ const { body } = require("express-validator");
 const router = express.Router();
 
 const booksController = require("../controllers/feed");
+const isAuth = require("../middleware/isAuth");
 
 router.get("/books", booksController.getBooks);
 

@@ -18,29 +18,32 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Form submitted:", formData);
-
+        setError(""); // Clear previous errors
         setLoading(true);
 
         fetch("http://localhost:8080/auth/login", {
-            method : "POST",
-            headers : {
-                'Content-Type' : 'application/json'
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
             },
-            body :JSON.stringify(formData)
-
+            body: JSON.stringify(formData),
         })
-        .then(response => response.json())
-        .then(data => {
-            login(data.userId,data.token);
-            console.log("Server response:", data);
-            setLoading(false);
-            navigate("/");
-        })
-        .catch(err => {
-            console.log("Error:", err);
-            setLoading(false);
-        })
+            .then(async (response) => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || "Login failed");
+                }
+                return data;
+            })
+            .then((data) => {
+                login({ id: data.userId }, data.token);
+                setLoading(false);
+                navigate("/");
+            })
+            .catch((err) => {
+                setError(err.message);
+                setLoading(false);
+            });
     };
 
     return (
