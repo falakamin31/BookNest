@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import {useAuth} from "../hooks/useAuth";
 
 const Login = () => {
+    const navigate = useNavigate();
+    const {login} = useAuth();
+
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -13,7 +19,28 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form submitted:", formData);
-        // API call yahan baad mein aayegi
+
+        setLoading(true);
+
+        fetch("http://localhost:8080/auth/login", {
+            method : "POST",
+            headers : {
+                'Content-Type' : 'application/json'
+            },
+            body :JSON.stringify(formData)
+
+        })
+        .then(response => response.json())
+        .then(data => {
+            login(data.userId,data.token);
+            console.log("Server response:", data);
+            setLoading(false);
+            navigate("/");
+        })
+        .catch(err => {
+            console.log("Error:", err);
+            setLoading(false);
+        })
     };
 
     return (

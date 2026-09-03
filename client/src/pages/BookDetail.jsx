@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../hooks/useAuh";
+import { useAuth } from "../hooks/useAuth";
 
 const dummyBook = {
     id: 1,

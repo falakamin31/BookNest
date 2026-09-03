@@ -39,6 +39,14 @@ app.use((req, res, next) => {
 app.use("/feed", booksRoutes);
 app.use("/auth", authRoutes);
 
+// Error middleware
+app.use((error, req, res, next) => {
+    const status = error.statusCode || 500;
+    const message = error.message;
+
+    res.status(status).json({ message: message });
+});
+
 mongoose.connect(process.env.MONGODB_URI).then((result) => {
     console.log("Connected to mongodb");
 

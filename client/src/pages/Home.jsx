@@ -9,6 +9,11 @@ const Home = () => {
             try {
                 let response = await fetch(
                     "http://localhost:8080/feed/books",
+                    {
+                        headers : {
+                            'Authorization' : 'Bearer ' + localStorage.getItem('token')
+                        }
+                    }
                 );
                 let data = await response.json();
                 console.log("Fetched books:", data);
