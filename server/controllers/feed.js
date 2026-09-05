@@ -1,6 +1,7 @@
 // GET /books
 const { validationResult } = require("express-validator");
 const Book = require("../models/book");
+
 exports.getBooks = (req, res, next) => {
     Book.find()
         .then((books) => {
@@ -51,5 +52,27 @@ exports.createBook = (req, res, next) => {
         })
         .catch((err) => {
             console.log(err);
+        });
+};
+exports.singleBook = (req, res, next) => {
+    const id = req.params.id;
+
+    Book.findById(id)
+        .then((book) => {
+            if (!book) {
+                const error = new Error("Book not found");
+                error.statusCode = 404;
+                throw error;
+            }
+            res.status(200).json({
+                message: "Fetched single book",
+                book: book,
+            });
+        })
+        .catch((err) => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
         });
 };

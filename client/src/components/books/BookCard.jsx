@@ -7,7 +7,7 @@ const BookCard = ({ book }) => {
 
     return (
         <div className="bg-surface rounded-2xl overflow-hidden border border-white/5 hover:border-primary/40 transition-colors group">
-            <Link to={`/book/${book.id}`}>
+            <Link to={`/book/${book._id}`}>
                 <div className="aspect-[3/4] overflow-hidden bg-slate-800">
                     <img
                         src={`http://localhost:8080/${book.imageUrl}`}

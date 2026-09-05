@@ -27,4 +27,5 @@ router.post(
     booksController.createBook,
 );
 
+router.get("/book/:id", booksController.singleBook);
 module.exports = router;

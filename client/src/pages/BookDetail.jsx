@@ -1,27 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-
-const dummyBook = {
-    id: 1,
-    title: "The Midnight Library",
-    authorName: "Matt Haig",
-    price: 14.99,
-    imageUrl: "https://covers.openlibrary.org/b/id/10389359-L.jpg",
-    description:
-        "Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived.",
-    createdBy: "someUserId123",
-};
 
 const BookDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [book, setBook] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
 
-    const isOwner = user && dummyBook.createdBy === user.id;
+    const isOwner = user && book && book.createdBy === user.id;
+
+    useEffect(() => {
+        // send api request to fetch book details using the id from params
+        const fetchBookDetails = async () => {
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/feed/book/${id}`,
+                );
+                if (!response.ok) {
+                    throw new Error("failed to fetched the book");
+                }
+                const data = await response.json();
+                setBook(data.book);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBookDetails();
+    }, [id]);
 
     const handleEdit = () => {
         navigate(`/edit-book/${id}`);
@@ -37,6 +49,24 @@ const BookDetail = () => {
         console.log("Deleting book with id:", id);
         setDeleting(false);
     };
+    if (loading) {
+        return (
+            <p
+                className="text-center text-gray-400 py-20"
+            >
+                Loading...
+            </p>
+        );
+    }
+    if (!book) {
+        return (
+            <p
+                className="text-center text-red-400 py-20"
+            >
+                {error || "Book not found"}
+            </p>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto px-6 py-10">
@@ -57,8 +87,8 @@ const BookDetail = () => {
                 <div className="md:col-span-1">
                     <div className="aspect-[3/4] rounded-xl overflow-hidden bg-surface border border-white/10">
                         <img
-                            src={dummyBook.imageUrl}
-                            alt={dummyBook.title}
+                            src={`http://localhost:8080/${book.imageUrl}`}
+                            alt={book.title}
                             className="w-full h-full object-cover"
                         />
                     </div>
@@ -67,19 +97,19 @@ const BookDetail = () => {
                 <div className="md:col-span-2 flex flex-col gap-4">
                     <div>
                         <h1 className="font-heading text-3xl font-bold text-white">
-                            {dummyBook.title}
+                            {book.title}
                         </h1>
                         <p className="text-gray-400 mt-1">
-                            by {dummyBook.authorName}
+                            by {book.authorName}
                         </p>
                     </div>
 
                     <span className="text-primary text-2xl font-semibold">
-                        ${dummyBook.price}
+                        ${book.price}
                     </span>
 
                     <p className="text-gray-300 leading-relaxed">
-                        {dummyBook.description}
+                        {book.description}
                     </p>
 
                     {isOwner && (
