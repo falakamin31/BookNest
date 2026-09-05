@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";   // 🟢
 
 const Signup = () => {
+    const navigate = useNavigate(); 
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -16,9 +17,8 @@ const Signup = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Form submitted:", formData);
-        
-        setLoading(true);
+        setError(""); // Clear previous errors
+        setLoading(true);        
         fetch("http://localhost:8080/auth/signup", {
             method: "POST",
             headers: {
@@ -26,13 +26,25 @@ const Signup = () => {
             },
             body: JSON.stringify(formData),
         })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("Server response:", data);
+            .then(async (response) => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(
+                        data.errors?.[0]?.msg ||
+                            data.message ||
+                            "Signup failed",
+                    );
+                }
+                return data;
+            })
+            .then(() => {
+                
                 setLoading(false);
+                navigate("/login");
             })
             .catch((err) => {
-                console.log("Error:", err);
+              
+                setError(err.message);
                 setLoading(false);
             });
     }
@@ -76,6 +88,7 @@ const Signup = () => {
                         <input
                             type="email"
                             name="email"
+                            autoComplete="email"
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="you@example.com"

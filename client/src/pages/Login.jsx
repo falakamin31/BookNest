@@ -69,6 +69,7 @@ const Login = () => {
                         </label>
                         <input
                             type="email"
+                            autoComplete="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
