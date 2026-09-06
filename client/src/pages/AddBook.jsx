@@ -41,18 +41,20 @@ const AddBook = () => {
                 formPayload.append("image", imageFile);
             }
             
-            fetch("http://localhost:8080/feed/book", {
-                body: formPayload,
-                method: "POST",
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log("Server response:", data);
-                    navigate("/"); // Redirect to home or another page after successful submission
-                })
-                .catch((err) => {
-                    console.log("Error submitting book:", err);
-                });
+              fetch("http://localhost:8080/feed/book", {
+                  method: "POST",
+                  headers: {
+                      Authorization: "Bearer " + localStorage.getItem("token"),
+                  },
+                  body: formPayload,
+              })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      navigate("/"); // Redirect to home or another page after successful submission
+                  })
+                  .catch((err) => {
+                      console.log("Error submitting book:", err);
+                  });
 
 
         }

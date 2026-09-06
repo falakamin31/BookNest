@@ -40,7 +40,7 @@ exports.createBook = (req, res, next) => {
         price: price,
         description: description,
         imageUrl: imageUrl,
-        createdBy: "507f1f77bcf86cd799439011",
+        createdBy: req.userId,
     });
     return book
         .save()

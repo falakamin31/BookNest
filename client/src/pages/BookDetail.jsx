@@ -7,15 +7,17 @@ const BookDetail = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [book, setBook] = useState(null);
+    console.log(book, "book details for id:", id);
     const [loading, setLoading] = useState(true);
 
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
 
     const isOwner = user && book && book.createdBy === user.id;
+    console.log("isOwner:", isOwner, "user:", user, "book:", book);
 
     useEffect(() => {
-        // send api request to fetch book details using the id from params
+        
         const fetchBookDetails = async () => {
             try {
                 const response = await fetch(

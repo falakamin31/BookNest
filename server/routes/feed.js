@@ -11,6 +11,7 @@ router.get("/books", booksController.getBooks);
 
 router.post(
     "/book",
+    isAuth,
     upload.single("image"),
     [
         body("title").trim().notEmpty().withMessage("Title is required"),
