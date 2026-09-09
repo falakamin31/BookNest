@@ -38,7 +38,7 @@ const BookCard = ({ book }) => {
                 {isOwner && (
                     <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
                         <Link
-                            to={`/edit-book/${book.id}`}
+                            to={`/edit-book/${book._id}`}
                             className="text-xs text-gray-400 hover:text-white transition-colors"
                         >
                             Edit

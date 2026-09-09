@@ -29,4 +29,22 @@ router.post(
 );
 
 router.get("/book/:id", booksController.singleBook);
+router.put(
+    "/book/:id",
+    isAuth,
+    upload.single("image"),
+    [
+        body("title").trim().notEmpty().withMessage("Title is required"),
+        body("authorName")
+            .trim()
+            .notEmpty()
+            .withMessage("Author name is required"),
+        body("price")
+            .notEmpty()
+            .withMessage("Price is required")
+            .isFloat({ gt: 0 })
+            .withMessage("Price must be a positive number"),
+    ],
+    booksController.editBook,
+);
 module.exports = router;
