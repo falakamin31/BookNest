@@ -1,17 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const NavBar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const { user, token, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const isLoggedIn = Boolean(user && token);
+
+    const handleLogout = () => {
+        setIsOpen(false);
+        logout();
+        navigate("/");
+    };
 
     const navLinks = [
         { name: "Home", path: "/" },
-        { name: "Add Book", path: "/add-book" },
-        { name: "My Books", path: "/my-books" },
+        ...(isLoggedIn
+            ? [
+                  { name: "Add Book", path: "/add-book" },
+                  { name: "My Books", path: "/my-books" },
+              ]
+            : []),
     ];
-    const { user } = useAuth();
-    console.log("Current user:", user);
 
     return (
         <nav className="bg-background text-white shadow-md relative">
@@ -37,22 +49,36 @@ const NavBar = () => {
                             </Link>
                         </li>
                     ))}
-                    <li>
-                        <Link
-                            to="/login"
-                            className="hover:text-primary transition-colors"
-                        >
-                            Login
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/signup"
-                            className="bg-primary hover:opacity-90 px-4 py-1.5 rounded-md transition-opacity"
-                        >
-                            Signup
-                        </Link>
-                    </li>
+
+                    {isLoggedIn ? (
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="hover:text-primary transition-colors cursor-pointer"
+                            >
+                                Logout
+                            </button>
+                        </li>
+                    ) : (
+                        <>
+                            <li>
+                                <Link
+                                    to="/login"
+                                    className="hover:text-primary transition-colors"
+                                >
+                                    Login
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/signup"
+                                    className="bg-primary hover:opacity-90 px-4 py-1.5 rounded-md transition-opacity"
+                                >
+                                    Signup
+                                </Link>
+                            </li>
+                        </>
+                    )}
                 </ul>
 
                 {/* Mobile hamburger button */}
@@ -79,24 +105,38 @@ const NavBar = () => {
                             </Link>
                         </li>
                     ))}
-                    <li>
-                        <Link
-                            to="/login"
-                            onClick={() => setIsOpen(false)}
-                            className="block py-2 hover:text-primary transition-colors"
-                        >
-                            Login
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/signup"
-                            onClick={() => setIsOpen(false)}
-                            className="block py-2 text-primary font-medium"
-                        >
-                            Signup
-                        </Link>
-                    </li>
+
+                    {isLoggedIn ? (
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="block py-2 hover:text-primary transition-colors cursor-pointer"
+                            >
+                                Logout
+                            </button>
+                        </li>
+                    ) : (
+                        <>
+                            <li>
+                                <Link
+                                    to="/login"
+                                    onClick={() => setIsOpen(false)}
+                                    className="block py-2 hover:text-primary transition-colors"
+                                >
+                                    Login
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/signup"
+                                    onClick={() => setIsOpen(false)}
+                                    className="block py-2 text-primary font-medium"
+                                >
+                                    Signup
+                                </Link>
+                            </li>
+                        </>
+                    )}
                 </ul>
             )}
         </nav>

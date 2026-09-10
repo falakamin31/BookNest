@@ -13,7 +13,10 @@ exports.getBooks = (req, res, next) => {
             });
         })
         .catch((err) => {
-            console.log(err);
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
         });
 };
 
@@ -53,7 +56,10 @@ exports.createBook = (req, res, next) => {
             });
         })
         .catch((err) => {
-            console.log(err);
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
         });
 };
 exports.singleBook = (req, res, next) => {
@@ -137,7 +143,7 @@ const clearImage = (filePath) => {
     filePath = path.join(__dirname, "..", filePath);
     fs.unlink(filePath, (err) => {
         if (err) {
-            console.log(err);
+            console.log("Failed to delete old image:", err);
         }
     });
 };

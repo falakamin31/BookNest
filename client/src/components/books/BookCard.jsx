@@ -28,7 +28,7 @@ const BookCard = ({ book }) => {
                         ${book.price}
                     </span>
                     <Link
-                        to={`/book/${book.id}`}
+                        to={`/book/${book._id}`}
                         className="text-xs font-medium text-gray-300 hover:text-white transition-colors"
                     >
                         View →
