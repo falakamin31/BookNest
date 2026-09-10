@@ -1,7 +1,16 @@
 import { Routes, Route } from "react-router-dom";
 import { NavBar } from "./components";
-import { Home, Login, Signup, AddBook, BookDetail, MyBooks } from "./pages";
+import {
+    Home,
+    Login,
+    Signup,
+    AddBook,
+    BookDetail,
+    MyBooks,
+    NotFound,
+} from "./pages";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
+import PublicRoutes from "./routes/PublicRoutes";
 
 const App = () => {
     return (
@@ -10,9 +19,13 @@ const App = () => {
             <Routes>
                 {/* Public */}
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
                 <Route path="/book/:id" element={<BookDetail />} />
+
+                {/* Logged out only */}
+                <Route element={<PublicRoutes />}>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                </Route>
 
                 {/* Logged in only */}
                 <Route element={<ProtectedRoutes />}>
@@ -20,6 +33,9 @@ const App = () => {
                     <Route path="/edit-book/:id" element={<AddBook />} />
                     <Route path="/my-books" element={<MyBooks />} />
                 </Route>
+
+                {/* Fallback */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </>
     );

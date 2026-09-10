@@ -7,6 +7,20 @@ const router = express.Router();
 const booksController = require("../controllers/feed");
 const isAuth = require("../middleware/isAuth");
 
+const bookValidation = [
+    body("title").trim().notEmpty().withMessage("Title is required"),
+    body("authorName").trim().notEmpty().withMessage("Author name is required"),
+    body("price")
+        .notEmpty()
+        .withMessage("Price is required")
+        .isFloat({ gt: 0 })
+        .withMessage("Price must be a positive number"),
+    body("description")
+        .trim()
+        .notEmpty()
+        .withMessage("Description is required"),
+];
+
 router.get("/books", booksController.getBooks);
 router.get("/my-books", isAuth, booksController.getMyBooks);
 
@@ -14,18 +28,7 @@ router.post(
     "/book",
     isAuth,
     upload.single("image"),
-    [
-        body("title").trim().notEmpty().withMessage("Title is required"),
-        body("authorName")
-            .trim()
-            .notEmpty()
-            .withMessage("Author name is required"),
-        body("price")
-            .notEmpty()
-            .withMessage("Price is required")
-            .isFloat({ gt: 0 })
-            .withMessage("Price must be a positive number"),
-    ],
+    bookValidation,
     booksController.createBook,
 );
 
@@ -34,22 +37,9 @@ router.put(
     "/book/:id",
     isAuth,
     upload.single("image"),
-    [
-        body("title").trim().notEmpty().withMessage("Title is required"),
-        body("authorName")
-            .trim()
-            .notEmpty()
-            .withMessage("Author name is required"),
-        body("price")
-            .notEmpty()
-            .withMessage("Price is required")
-            .isFloat({ gt: 0 })
-            .withMessage("Price must be a positive number"),
-    ],
+    bookValidation,
     booksController.editBook,
 );
 router.delete("/book/:id", isAuth, booksController.deleteBook);
-
-router.get("/my-books", isAuth, booksController.getMyBooks);
 
 module.exports = router;
