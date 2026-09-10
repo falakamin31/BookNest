@@ -8,6 +8,7 @@ const booksController = require("../controllers/feed");
 const isAuth = require("../middleware/isAuth");
 
 router.get("/books", booksController.getBooks);
+router.get("/my-books", isAuth, booksController.getMyBooks);
 
 router.post(
     "/book",
@@ -48,5 +49,7 @@ router.put(
     booksController.editBook,
 );
 router.delete("/book/:id", isAuth, booksController.deleteBook);
+
+router.get("/my-books", isAuth, booksController.getMyBooks);
 
 module.exports = router;

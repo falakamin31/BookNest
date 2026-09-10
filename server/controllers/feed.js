@@ -20,6 +20,24 @@ exports.getBooks = (req, res, next) => {
         });
 };
 
+
+exports.getMyBooks = (req, res, next) => {
+    Book.find({ createdBy: req.userId })
+        .sort({ createdAt: -1 })
+        .then((books) => {
+            res.status(200).json({
+                message: "Books fetched successfully",
+                books: books,
+            });
+        })
+        .catch((err) => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
 exports.createBook = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
