@@ -139,6 +139,38 @@ exports.editBook = (req, res, next) => {
         });
 };
 
+exports.deleteBook = (req, res, next) => {
+    const id = req.params.id;
+
+    Book.findById(id)
+        .then((book) => {
+            if (!book) {
+                const error = new Error("Book not found");
+                error.statusCode = 404;
+                throw error;
+            }
+            if (book.createdBy.toString() !== req.userId) {
+                const error = new Error("Not authorized");
+                error.statusCode = 403;
+                throw error;
+            }
+
+            clearImage(book.imageUrl);
+            return book.deleteOne();
+        })
+        .then(() => {
+            res.status(200).json({
+                message: "Book deleted successfully",
+            });
+        })
+        .catch((err) => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
 const clearImage = (filePath) => {
     filePath = path.join(__dirname, "..", filePath);
     fs.unlink(filePath, (err) => {

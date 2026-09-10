@@ -7,7 +7,6 @@ const BookDetail = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [book, setBook] = useState(null);
-    console.log(book, "book details for id:", id);
     const [loading, setLoading] = useState(true);
 
     const [deleting, setDeleting] = useState(false);
@@ -41,15 +40,35 @@ const BookDetail = () => {
         navigate(`/edit-book/${id}`);
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         const confirmed = window.confirm(
             "Are you sure you want to delete this book?",
         );
         if (!confirmed) return;
 
+        setError("");
         setDeleting(true);
-        console.log("Deleting book with id:", id);
-        setDeleting(false);
+
+        try {
+            const response = await fetch(
+                `http://localhost:8080/feed/book/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                },
+            );
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to delete the book");
+            }
+            navigate("/");
+        } catch (err) {
+            setError(err.message);
+            setDeleting(false);
+        }
     };
     if (loading) {
         return (

@@ -1,9 +1,44 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
-const BookCard = ({ book }) => {
+const BookCard = ({ book, onDelete }) => {
     const { user } = useAuth();
+    const [deleting, setDeleting] = useState(false);
     const isOwner = user && book.createdBy === user.id;
+
+    const handleDelete = async () => {
+        const confirmed = window.confirm(
+            `Delete "${book.title}"? This cannot be undone.`,
+        );
+        if (!confirmed) return;
+
+        setDeleting(true);
+
+        try {
+            const response = await fetch(
+                `http://localhost:8080/feed/book/${book._id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                },
+            );
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to delete the book");
+            }
+            if (onDelete) {
+                onDelete(book._id);
+            }
+        } catch (err) {
+            window.alert(err.message);
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     return (
         <div className="bg-surface rounded-2xl overflow-hidden border border-white/5 hover:border-primary/40 transition-colors group">
@@ -44,8 +79,12 @@ const BookCard = ({ book }) => {
                             Edit
                         </Link>
                         <span className="text-xs text-gray-600">·</span>
-                        <button className="text-xs text-red-400 hover:text-red-300 transition-colors">
-                            Delete
+                        <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 cursor-pointer"
+                        >
+                            {deleting ? "Deleting..." : "Delete"}
                         </button>
                     </div>
                 )}

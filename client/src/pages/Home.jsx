@@ -24,6 +24,10 @@ const Home = () => {
         };
         fetchBooks();
     }, []);
+
+    const handleDelete = (deletedId) => {
+        setBooks((prev) => prev.filter((b) => b._id !== deletedId));
+    };
     return (
         <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="mb-8">
@@ -37,7 +41,11 @@ const Home = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                 {books.map((book) => (
-                    <BookCard key={book.id} book={book} />
+                    <BookCard
+                        key={book._id}
+                        book={book}
+                        onDelete={handleDelete}
+                    />
                 ))}
             </div>
         </div>

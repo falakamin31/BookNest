@@ -47,4 +47,6 @@ router.put(
     ],
     booksController.editBook,
 );
+router.delete("/book/:id", isAuth, booksController.deleteBook);
+
 module.exports = router;
