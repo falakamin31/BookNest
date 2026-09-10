@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Loader } from "../components";
 
 const AddBook = () => {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ const AddBook = () => {
     });
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
-    const [loading, setLoading] = useState(isEditMode); // Set loading to true if in edit mode
+    const [loading, setLoading] = useState(isEditMode);
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
@@ -33,7 +34,6 @@ const AddBook = () => {
     useEffect(() => {
         if (!isEditMode) return;
 
-        // Fetch the existing book data for editing
         const fetchBook = async () => {
             try {
                 const response = await fetch(
@@ -108,143 +108,182 @@ const AddBook = () => {
     };
 
     if (loading) {
-        return <p className="text-center text-gray-400 py-20">Loading...</p>;
+        return <Loader label="Loading book" />;
     }
 
-    return (
-        <div className="max-w-4xl mx-auto px-6 py-10">
-            <div className="mb-8">
-                <h1 className="font-heading text-3xl font-bold text-white">
-                    {isEditMode ? "Edit Book" : "Add a Book"}
-                </h1>
-                <p className="text-gray-400 mt-1">
-                    {isEditMode
-                        ? "Update the details of your book"
-                        : "Share a book with the BookNest community"}
-                </p>
-            </div>
+    const field =
+        "w-full rounded-lg border border-line bg-paper/50 px-3 py-2 text-sm text-ink placeholder-muted transition-all duration-200 focus:border-accent focus:bg-surface focus:ring-2 focus:ring-accent/15 focus:outline-none";
+    const label = "mb-1.5 block text-[13px] font-medium text-ink";
 
+    return (
+        <div className="mx-auto max-w-3xl px-6 py-6">
             <form
                 onSubmit={handleSubmit}
-                className="bg-surface rounded-2xl border border-white/10 shadow-xl shadow-black/20 p-8 md:p-10"
+                className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_16px_44px_-32px_rgba(27,23,20,0.4)]"
             >
-                <div className="grid md:grid-cols-3 gap-8 items-start">
-                    {/* Left: cover upload */}
-                    <div className="md:col-span-1">
-                        <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                            Cover Image
-                        </label>
+                {/* Header */}
+                <div className="flex items-baseline justify-between gap-4 border-b border-line px-6 py-4">
+                    <h1 className="font-display text-xl font-semibold text-ink">
+                        {isEditMode ? "Edit book" : "Add a book"}
+                    </h1>
+                    <p className="text-xs text-muted">
+                        {isEditMode ? "Update the details" : "All fields required"}
+                    </p>
+                </div>
+
+                {/* Body */}
+                <div className="grid gap-6 px-6 py-5 sm:grid-cols-[150px_1fr]">
+                    {/* Cover */}
+                    <div>
+                        <span className={label}>Cover</span>
 
                         <label
                             htmlFor="coverImage"
-                            className="relative w-full flex flex-col items-center justify-center gap-3 bg-background border border-dashed border-white/20 rounded-xl aspect-[3/4] cursor-pointer hover:border-primary transition-colors overflow-hidden"
+                            className="group relative flex aspect-4/5 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-line-strong bg-paper/60 transition-colors duration-200 hover:border-accent hover:bg-accent-soft/40"
                         >
                             {previewUrl ? (
-                                <img
-                                    src={previewUrl}
-                                    alt="Preview"
-                                    className="absolute inset-0 w-full h-full object-cover"
-                                />
-                            ) : (
                                 <>
-                                    <span className="text-3xl">📷</span>
-                                    <span className="text-sm text-gray-500 px-4 text-center">
-                                        Click to upload cover
+                                    <img
+                                        src={previewUrl}
+                                        alt="Cover preview"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                    <span className="absolute inset-0 flex items-center justify-center bg-ink/55 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                        Change
                                     </span>
                                 </>
+                            ) : (
+                                <span className="flex flex-col items-center gap-1 text-muted">
+                                    <span className="text-2xl leading-none">
+                                        ＋
+                                    </span>
+                                    <span className="text-xs">Upload</span>
+                                </span>
                             )}
                         </label>
 
                         <input
                             id="coverImage"
                             type="file"
-                            accept="image/*"
+                            accept="image/png, image/jpeg"
                             onChange={handleImageChange}
                             className="hidden"
                         />
                     </div>
 
-                    {/* Right: form fields */}
-                    <div className="md:col-span-2 flex flex-col gap-5">
+                    {/* Fields */}
+                    <div className="flex flex-col gap-3.5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                            <label htmlFor="title" className={label}>
                                 Title
                             </label>
                             <input
+                                id="title"
                                 type="text"
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
-                                placeholder="e.g. The Midnight Library"
+                                placeholder="The Midnight Library"
                                 required
-                                className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                className={field}
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                                Author Name
-                            </label>
-                            <input
-                                type="text"
-                                name="authorName"
-                                value={formData.authorName}
-                                onChange={handleChange}
-                                placeholder="e.g. Matt Haig"
-                                required
-                                className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                            />
+                        <div className="grid gap-3.5 sm:grid-cols-[1fr_120px]">
+                            <div>
+                                <label htmlFor="authorName" className={label}>
+                                    Author
+                                </label>
+                                <input
+                                    id="authorName"
+                                    type="text"
+                                    name="authorName"
+                                    value={formData.authorName}
+                                    onChange={handleChange}
+                                    placeholder="Matt Haig"
+                                    required
+                                    className={field}
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="price" className={label}>
+                                    Price
+                                </label>
+                                <div className="relative">
+                                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted">
+                                        $
+                                    </span>
+                                    <input
+                                        id="price"
+                                        type="number"
+                                        name="price"
+                                        step="0.01"
+                                        min="0.01"
+                                        value={formData.price}
+                                        onChange={handleChange}
+                                        placeholder="14.99"
+                                        required
+                                        className={`${field} pl-6`}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                                Price ($)
-                            </label>
-                            <input
-                                type="number"
-                                name="price"
-                                step="0.01"
-                                value={formData.price}
-                                onChange={handleChange}
-                                placeholder="14.99"
-                                required
-                                className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                            <label htmlFor="description" className={label}>
                                 Description
                             </label>
                             <textarea
+                                id="description"
                                 name="description"
-                                rows="4"
+                                rows="2"
                                 value={formData.description}
                                 onChange={handleChange}
-                                placeholder="A short description of the book..."
-                                className="w-full bg-background border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+                                placeholder="What is this book about?"
+                                required
+                                className={`${field} resize-none`}
                             />
                         </div>
                     </div>
                 </div>
 
-                {error && (
-                    <p className="mt-6 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-2.5">
-                        {error}
-                    </p>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={submitting}
-                    className="mt-8 w-full md:w-auto md:self-start bg-primary hover:bg-primary-dark text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-lg shadow-primary/20 disabled:opacity-50"
-                >
-                    {submitting
-                        ? "Saving..."
-                        : isEditMode
-                          ? "Save Changes"
-                          : "Add Book"}
-                </button>
+                {/* Actions */}
+                <div className="flex items-center gap-3 border-t border-line bg-paper/40 px-6 py-3.5">
+                    <button
+                        type="submit"
+                        disabled={submitting}
+                        className="cursor-pointer rounded-full bg-accent px-6 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-accent-dark active:scale-[0.98] disabled:opacity-50"
+                    >
+                        {submitting
+                            ? "Saving…"
+                            : isEditMode
+                              ? "Save changes"
+                              : "Add book"}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="cursor-pointer rounded-full px-3 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:text-ink"
+                    >
+                        Cancel
+                    </button>
+                    {error ? (
+                        <p
+                            role="alert"
+                            title={error}
+                            className="ml-auto truncate text-xs font-medium text-danger"
+                        >
+                            {error}
+                        </p>
+                    ) : (
+                        isEditMode && (
+                            <span className="ml-auto truncate text-xs text-muted">
+                                Cover unchanged unless you upload a new one
+                            </span>
+                        )
+                    )}
+                </div>
             </form>
         </div>
     );

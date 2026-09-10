@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { ConfirmDialog } from "../common";
 
-const BookCard = ({ book, onDelete }) => {
+const BookCard = ({ book, onDelete, index = 0 }) => {
     const { user } = useAuth();
     const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
+    const [imgFailed, setImgFailed] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const isOwner = user && book.createdBy === user.id;
 
     const handleDelete = async () => {
-        const confirmed = window.confirm(
-            `Delete "${book.title}"? This cannot be undone.`,
-        );
-        if (!confirmed) return;
-
+        setDeleteError("");
         setDeleting(true);
 
         try {
@@ -30,66 +30,102 @@ const BookCard = ({ book, onDelete }) => {
             if (!response.ok) {
                 throw new Error(data.message || "Failed to delete the book");
             }
+            setConfirmOpen(false);
             if (onDelete) {
                 onDelete(book._id);
             }
         } catch (err) {
-            window.alert(err.message);
-        } finally {
+            setDeleteError(err.message || "Could not delete");
             setDeleting(false);
+            setConfirmOpen(false);
         }
     };
 
     return (
-        <div className="bg-surface rounded-2xl overflow-hidden border border-white/5 hover:border-primary/40 transition-colors group">
-            <Link to={`/book/${book._id}`}>
-                <div className="aspect-[3/4] overflow-hidden bg-slate-800">
-                    <img
-                        src={`http://localhost:8080/${book.imageUrl}`}
-                        alt={book.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+        <article
+            className="animate-card-in group flex flex-col"
+            style={{ animationDelay: `${Math.min(index, 11) * 45}ms` }}
+        >
+            <Link
+                to={`/book/${book._id}`}
+                aria-label={book.title}
+                className="relative block transform-gpu rounded-lg shadow-[0_2px_6px_-2px_rgba(27,23,20,0.14)] ring-1 ring-ink/5 transition-[transform,box-shadow] duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-12px_rgba(27,23,20,0.28)]"
+            >
+                <div className="aspect-4/5 overflow-hidden rounded-lg bg-soft">
+                    {imgFailed ? (
+                        <div className="flex h-full w-full items-center justify-center">
+                            <span className="font-display text-3xl font-semibold text-line-strong">
+                                {book.title?.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                    ) : (
+                        <img
+                            src={`http://localhost:8080/${book.imageUrl}`}
+                            alt={book.title}
+                            loading="lazy"
+                            onError={() => setImgFailed(true)}
+                            className="h-full w-full object-cover"
+                        />
+                    )}
                 </div>
             </Link>
 
-            <div className="p-4">
-                <h3 className="font-heading text-lg font-semibold text-white truncate">
-                    {book.title}
-                </h3>
-                <p className="text-sm text-gray-400 mt-1">{book.authorName}</p>
-
-                <div className="flex items-center justify-between mt-3">
-                    <span className="text-primary font-semibold">
-                        ${book.price}
-                    </span>
+            <div className="mt-3.5 flex flex-1 flex-col">
+                <h3 className="min-h-[2.6rem] font-display text-[15px] leading-snug font-semibold text-ink">
                     <Link
                         to={`/book/${book._id}`}
-                        className="text-xs font-medium text-gray-300 hover:text-white transition-colors"
+                        className="line-clamp-2 transition-colors duration-200 hover:text-accent"
                     >
-                        View →
+                        {book.title}
                     </Link>
-                </div>
+                </h3>
+                <p className="truncate text-[13px] text-muted">
+                    {book.authorName}
+                </p>
 
-                {isOwner && (
-                    <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
-                        <Link
-                            to={`/edit-book/${book._id}`}
-                            className="text-xs text-gray-400 hover:text-white transition-colors"
+                <p className="mt-2 font-display text-[15px] font-semibold text-accent">
+                    ${book.price}
+                </p>
+
+                {isOwner &&
+                    (deleteError ? (
+                        <p
+                            role="alert"
+                            className="mt-2.5 text-xs leading-snug text-danger"
                         >
-                            Edit
-                        </Link>
-                        <span className="text-xs text-gray-600">·</span>
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 cursor-pointer"
-                        >
-                            {deleting ? "Deleting..." : "Delete"}
-                        </button>
-                    </div>
-                )}
+                            {deleteError}
+                        </p>
+                    ) : (
+                        <div className="mt-2.5 flex items-center gap-2.5 text-xs">
+                            <Link
+                                to={`/edit-book/${book._id}`}
+                                className="text-muted transition-colors hover:text-ink"
+                            >
+                                Edit
+                            </Link>
+                            <span className="text-line-strong">·</span>
+                            <button
+                                onClick={() => setConfirmOpen(true)}
+                                disabled={deleting}
+                                className="cursor-pointer text-muted transition-colors hover:text-danger disabled:opacity-50"
+                            >
+                                {deleting ? "Deleting…" : "Delete"}
+                            </button>
+                        </div>
+                    ))}
             </div>
-        </div>
+
+            <ConfirmDialog
+                open={confirmOpen}
+                title="Delete this book?"
+                message={`"${book.title}" will be permanently removed, along with its cover image. This cannot be undone.`}
+                confirmLabel="Delete book"
+                busyLabel="Deleting…"
+                loading={deleting}
+                onConfirm={handleDelete}
+                onCancel={() => setConfirmOpen(false)}
+            />
+        </article>
     );
 };
 

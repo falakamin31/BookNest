@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const NavBar = () => {
@@ -16,7 +16,7 @@ const NavBar = () => {
     };
 
     const navLinks = [
-        { name: "Home", path: "/" },
+        { name: "Browse", path: "/" },
         ...(isLoggedIn
             ? [
                   { name: "Add Book", path: "/add-book" },
@@ -25,28 +25,29 @@ const NavBar = () => {
             : []),
     ];
 
+    const linkClass = ({ isActive }) =>
+        `text-sm transition-colors ${
+            isActive ? "text-ink" : "text-body hover:text-ink"
+        }`;
+
     return (
-        <nav className="bg-background text-white shadow-md relative">
-            <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-                {/* Logo */}
+        <nav className="sticky top-0 z-20 border-b border-line bg-paper/85 backdrop-blur-md">
+            <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                 <Link
                     to="/"
                     onClick={() => setIsOpen(false)}
-                    className="text-2xl font-heading font-bold tracking-tight text-primary"
+                    className="font-display text-2xl font-semibold tracking-tight text-ink"
                 >
-                    BookNest
+                    Book<span className="text-accent">Nest</span>
                 </Link>
 
-                {/* Desktop links */}
-                <ul className="hidden md:flex items-center gap-6">
+                {/* Desktop */}
+                <ul className="hidden items-center gap-7 md:flex">
                     {navLinks.map((link) => (
                         <li key={link.path}>
-                            <Link
-                                to={link.path}
-                                className="hover:text-primary transition-colors"
-                            >
+                            <NavLink to={link.path} className={linkClass} end>
                                 {link.name}
-                            </Link>
+                            </NavLink>
                         </li>
                     ))}
 
@@ -54,38 +55,36 @@ const NavBar = () => {
                         <li>
                             <button
                                 onClick={handleLogout}
-                                className="hover:text-primary transition-colors cursor-pointer"
+                                className="cursor-pointer rounded-full border border-line px-4 py-1.5 text-sm text-body transition-colors hover:border-line-strong hover:text-ink"
                             >
-                                Logout
+                                Log out
                             </button>
                         </li>
                     ) : (
                         <>
                             <li>
-                                <Link
-                                    to="/login"
-                                    className="hover:text-primary transition-colors"
-                                >
-                                    Login
-                                </Link>
+                                <NavLink to="/login" className={linkClass}>
+                                    Log in
+                                </NavLink>
                             </li>
                             <li>
                                 <Link
                                     to="/signup"
-                                    className="bg-primary hover:opacity-90 px-4 py-1.5 rounded-md transition-opacity"
+                                    className="rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
                                 >
-                                    Signup
+                                    Sign up
                                 </Link>
                             </li>
                         </>
                     )}
                 </ul>
 
-                {/* Mobile hamburger button */}
+                {/* Mobile toggle */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="md:hidden text-2xl focus:outline-none"
+                    className="cursor-pointer text-xl text-ink md:hidden"
                     aria-label="Toggle menu"
+                    aria-expanded={isOpen}
                 >
                     {isOpen ? "✕" : "☰"}
                 </button>
@@ -93,16 +92,21 @@ const NavBar = () => {
 
             {/* Mobile menu */}
             {isOpen && (
-                <ul className="md:hidden flex flex-col gap-1 bg-background px-4 pb-4">
+                <ul className="flex flex-col gap-1 border-t border-line bg-surface px-6 py-3 md:hidden">
                     {navLinks.map((link) => (
                         <li key={link.path}>
-                            <Link
+                            <NavLink
                                 to={link.path}
                                 onClick={() => setIsOpen(false)}
-                                className="block py-2 hover:text-primary transition-colors"
+                                className={({ isActive }) =>
+                                    `block py-2 text-sm ${
+                                        isActive ? "text-ink" : "text-body"
+                                    }`
+                                }
+                                end
                             >
                                 {link.name}
-                            </Link>
+                            </NavLink>
                         </li>
                     ))}
 
@@ -110,9 +114,9 @@ const NavBar = () => {
                         <li>
                             <button
                                 onClick={handleLogout}
-                                className="block py-2 hover:text-primary transition-colors cursor-pointer"
+                                className="block cursor-pointer py-2 text-sm text-body"
                             >
-                                Logout
+                                Log out
                             </button>
                         </li>
                     ) : (
@@ -121,18 +125,18 @@ const NavBar = () => {
                                 <Link
                                     to="/login"
                                     onClick={() => setIsOpen(false)}
-                                    className="block py-2 hover:text-primary transition-colors"
+                                    className="block py-2 text-sm text-body"
                                 >
-                                    Login
+                                    Log in
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/signup"
                                     onClick={() => setIsOpen(false)}
-                                    className="block py-2 text-primary font-medium"
+                                    className="block py-2 text-sm font-medium text-accent"
                                 >
-                                    Signup
+                                    Sign up
                                 </Link>
                             </li>
                         </>
