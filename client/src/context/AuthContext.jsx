@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { AuthContext } from "./auth-context";
-import { setUnauthorizedHandler } from "../services/api";
 
 const readStoredAuth = () => {
     const storedToken = localStorage.getItem("token");
@@ -34,13 +33,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
     }, []);
-
-    // Any 401 from the API clears the session; ProtectedRoutes then
-    // redirects on the next render.
-    useEffect(() => {
-        setUnauthorizedHandler(logout);
-        return () => setUnauthorizedHandler(null);
-    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ user, token, login, logout }}>

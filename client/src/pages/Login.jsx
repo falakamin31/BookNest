@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { authService } from "../services";
+import { API } from "../config";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -20,8 +20,20 @@ const Login = () => {
         setError("");
         setLoading(true);
 
-        authService
-            .login(formData)
+        fetch(`${API}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+        })
+            .then(async (response) => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(
+                        data.errors?.[0]?.msg || data.message || "Login failed",
+                    );
+                }
+                return data;
+            })
             .then((data) => {
                 login({ id: data.userId }, data.token);
                 setLoading(false);

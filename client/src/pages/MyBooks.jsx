@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BookCard, Loader } from "../components";
-import { bookService } from "../services";
+import { API } from "../config";
 
 const MyBooks = () => {
     const [books, setBooks] = useState([]);
@@ -11,7 +11,18 @@ const MyBooks = () => {
     useEffect(() => {
         const fetchMyBooks = async () => {
             try {
-                const data = await bookService.getMyBooks();
+                const response = await fetch(`${API}/feed/my-books`, {
+                    headers: {
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || "Failed to fetch your books",
+                    );
+                }
                 setBooks(data.books);
             } catch (err) {
                 setError(err.message || "Something went wrong");

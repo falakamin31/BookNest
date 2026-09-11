@@ -17,9 +17,22 @@ app.use(express.urlencoded({ extended: true }));
 //  static folder taake images browser se access ho sakein
 app.use("/images", express.static(path.join(__dirname, "images")));
 
-// CORS
+// CORS — CLIENT_URL may hold a comma-separated list of allowed origins.
+// If it is unset (local dev) any origin is allowed.
+const allowedOrigins = (process.env.CLIENT_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    const origin = req.get("Origin");
+
+    if (allowedOrigins.length === 0) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+    } else if (origin && allowedOrigins.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Vary", "Origin");
+    }
 
     res.setHeader(
         "Access-Control-Allow-Methods",
@@ -36,19 +49,48 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check — Render pings "/" to decide if the service is up
+app.get("/", (req, res) => {
+    res.status(200).json({ status: "ok", service: "BookNest API" });
+});
+
 app.use("/feed", booksRoutes);
 app.use("/auth", authRoutes);
 
+// Unknown route -> JSON 404 (Express would otherwise send an HTML page,
+// which breaks the client's response.json())
+app.use((req, res, next) => {
+    const error = new Error(`Cannot ${req.method} ${req.originalUrl}`);
+    error.statusCode = 404;
+    next(error);
+});
+
 // Error middleware
 app.use((error, req, res, next) => {
+    if (error.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({ message: "Image must be 2 MB or smaller" });
+    }
+
     const status = error.statusCode || 500;
     const message = error.message;
 
     res.status(status).json({ message: message });
 });
 
-mongoose.connect(process.env.MONGODB_URI).then((result) => {
-    console.log("Connected to mongodb");
+if (!process.env.MONGODB_URI) {
+    console.error("MONGODB_URI is not set — check your .env file");
+    process.exit(1);
+}
 
-    app.listen(process.env.PORT || 8080);
-});
+mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => {
+        const port = process.env.PORT || 8080;
+        app.listen(port, () => {
+            console.log(`BookNest API listening on port ${port}`);
+        });
+    })
+    .catch((err) => {
+        console.error("Could not connect to MongoDB:", err.message);
+        process.exit(1);
+    });

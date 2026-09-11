@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { ConfirmDialog } from "../common";
-import { bookService, assetUrl } from "../../services";
+import { API } from "../../config";
 
 const BookCard = ({ book, onDelete, index = 0 }) => {
     const { user } = useAuth();
@@ -17,7 +17,16 @@ const BookCard = ({ book, onDelete, index = 0 }) => {
         setDeleting(true);
 
         try {
-            await bookService.deleteBook(book._id);
+            const response = await fetch(`${API}/feed/book/${book._id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to delete the book");
+            }
             setConfirmOpen(false);
             if (onDelete) {
                 onDelete(book._id);
@@ -48,7 +57,7 @@ const BookCard = ({ book, onDelete, index = 0 }) => {
                         </div>
                     ) : (
                         <img
-                            src={assetUrl(book.imageUrl)}
+                            src={`${API}/${book.imageUrl}`}
                             alt={book.title}
                             loading="lazy"
                             onError={() => setImgFailed(true)}
