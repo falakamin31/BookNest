@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BookCard, Loader } from "../components";
+import { bookService } from "../services";
 
 const Home = () => {
     const [books, setBooks] = useState([]);
@@ -9,13 +10,7 @@ const Home = () => {
     useEffect(() => {
         const fetchBooks = async () => {
             try {
-                const response = await fetch(
-                    "http://localhost:8080/feed/books",
-                );
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.message || "Failed to load books");
-                }
+                const data = await bookService.getBooks();
                 setBooks(data.books);
             } catch (err) {
                 setError(err.message || "Something went wrong");

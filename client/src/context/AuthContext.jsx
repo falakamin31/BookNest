@@ -1,42 +1,46 @@
-import { createContext, useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { AuthContext } from "./auth-context";
+import { setUnauthorizedHandler } from "../services/api";
 
-export const AuthContext = createContext();
+const readStoredAuth = () => {
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(() => {
-        const stored = localStorage.getItem("token");
-        return stored && stored !== "undefined" ? stored : null;
-    });
+    if (!storedToken || storedToken === "undefined" || !storedUser) {
+        return { user: null, token: null };
+    }
 
-    
-      useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-          const storedUser = localStorage.getItem("user");
-          if (!storedUser || !storedToken) return;
-
-          try {
-              setUser(JSON.parse(storedUser));
-          } catch {
-              localStorage.removeItem("user");
-              localStorage.removeItem("token");
-              setToken(null);
-          }
-      }, []);
-
-    const login = (userData, userToken) => {
-        setUser(userData);
-        setToken(userToken);
-        localStorage.setItem("token", userToken);
-        localStorage.setItem("user", JSON.stringify(userData));
-    };
-
-    const logout = () => {
-        setUser(null);
-        setToken(null);
+    try {
+        return { user: JSON.parse(storedUser), token: storedToken };
+    } catch {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-    };
+        return { user: null, token: null };
+    }
+};
+
+export const AuthProvider = ({ children }) => {
+    const [auth, setAuth] = useState(readStoredAuth);
+    const { user, token } = auth;
+
+    const login = useCallback((userData, userToken) => {
+        setAuth({ user: userData, token: userToken });
+        localStorage.setItem("token", userToken);
+        localStorage.setItem("user", JSON.stringify(userData));
+    }, []);
+
+    const logout = useCallback(() => {
+        setAuth({ user: null, token: null });
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+    }, []);
+
+    // Any 401 from the API clears the session; ProtectedRoutes then
+    // redirects on the next render.
+    useEffect(() => {
+        setUnauthorizedHandler(logout);
+        return () => setUnauthorizedHandler(null);
+    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ user, token, login, logout }}>

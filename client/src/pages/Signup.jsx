@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../services";
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -21,24 +22,8 @@ const Signup = () => {
         setError("");
         setLoading(true);
 
-        fetch("http://localhost:8080/auth/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-        })
-            .then(async (response) => {
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(
-                        data.errors?.[0]?.msg ||
-                            data.message ||
-                            "Signup failed",
-                    );
-                }
-                return data;
-            })
+        authService
+            .signup(formData)
             .then(() => {
                 setLoading(false);
                 navigate("/login");

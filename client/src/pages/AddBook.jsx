@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "../components";
+import { bookService, assetUrl } from "../services";
 
 const AddBook = () => {
     const navigate = useNavigate();
@@ -36,22 +37,14 @@ const AddBook = () => {
 
         const fetchBook = async () => {
             try {
-                const response = await fetch(
-                    `http://localhost:8080/feed/book/${id}`,
-                );
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || "Failed to fetch book data",
-                    );
-                }
+                const data = await bookService.getBook(id);
                 setFormData({
                     title: data.book.title,
                     authorName: data.book.authorName,
                     price: data.book.price,
                     description: data.book.description,
                 });
-                setPreviewUrl(`http://localhost:8080/${data.book.imageUrl}`);
+                setPreviewUrl(assetUrl(data.book.imageUrl));
             } catch (err) {
                 setError(err.message || "Something went wrong");
             } finally {
@@ -75,28 +68,11 @@ const AddBook = () => {
             formPayload.append("image", imageFile);
         }
 
-        const url = isEditMode
-            ? `http://localhost:8080/feed/book/${id}`
-            : `http://localhost:8080/feed/book`;
+        const request = isEditMode
+            ? bookService.updateBook(id, formPayload)
+            : bookService.createBook(formPayload);
 
-        fetch(url, {
-            method: isEditMode ? "PUT" : "POST",
-            headers: {
-                Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-            body: formPayload,
-        })
-            .then(async (response) => {
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(
-                        data.errors?.[0]?.msg ||
-                            data.message ||
-                            "Failed to save the book",
-                    );
-                }
-                return data;
-            })
+        request
             .then(() => {
                 setSubmitting(false);
                 navigate(isEditMode ? `/book/${id}` : "/");

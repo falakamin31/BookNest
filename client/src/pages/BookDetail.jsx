@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Loader, ConfirmDialog } from "../components";
+import { bookService, assetUrl } from "../services";
 
 const BookDetail = () => {
     const { id } = useParams();
@@ -20,15 +21,7 @@ const BookDetail = () => {
     useEffect(() => {
         const fetchBookDetails = async () => {
             try {
-                const response = await fetch(
-                    `http://localhost:8080/feed/book/${id}`,
-                );
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || "Failed to fetch the book",
-                    );
-                }
+                const data = await bookService.getBook(id);
                 setBook(data.book);
             } catch (err) {
                 setError(err.message);
@@ -48,20 +41,7 @@ const BookDetail = () => {
         setDeleting(true);
 
         try {
-            const response = await fetch(
-                `http://localhost:8080/feed/book/${id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization:
-                            "Bearer " + localStorage.getItem("token"),
-                    },
-                },
-            );
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to delete the book");
-            }
+            await bookService.deleteBook(id);
             navigate("/");
         } catch (err) {
             setError(err.message);
@@ -110,7 +90,7 @@ const BookDetail = () => {
                                 </div>
                             ) : (
                                 <img
-                                    src={`http://localhost:8080/${book.imageUrl}`}
+                                    src={assetUrl(book.imageUrl)}
                                     alt={book.title}
                                     onError={() => setImgFailed(true)}
                                     className="h-full w-full object-cover"
