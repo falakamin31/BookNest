@@ -23,6 +23,9 @@ const BookModel = new Schema(
             type: String,
             required: true,
         },
+        imagePublicId: {
+            type: String,
+        },
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "User",

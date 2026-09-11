@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Loader, ConfirmDialog } from "../components";
-import { API } from "../config";
+import { API, imageSrc } from "../config";
 
 const BookDetail = () => {
     const { id } = useParams();
@@ -105,7 +105,7 @@ const BookDetail = () => {
                                 </div>
                             ) : (
                                 <img
-                                    src={`${API}/${book.imageUrl}`}
+                                    src={imageSrc(book.imageUrl)}
                                     alt={book.title}
                                     onError={() => setImgFailed(true)}
                                     className="h-full w-full object-cover"

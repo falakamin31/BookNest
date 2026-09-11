@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "../components";
-import { API } from "../config";
+import { API, imageSrc } from "../config";
 
 const AddBook = () => {
     const navigate = useNavigate();
@@ -50,7 +50,7 @@ const AddBook = () => {
                     price: data.book.price,
                     description: data.book.description,
                 });
-                setPreviewUrl(`${API}/${data.book.imageUrl}`);
+                setPreviewUrl(imageSrc(data.book.imageUrl));
             } catch (err) {
                 setError(err.message || "Something went wrong");
             } finally {

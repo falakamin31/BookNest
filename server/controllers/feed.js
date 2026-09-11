@@ -1,7 +1,6 @@
 // GET /books
 const { validationResult } = require("express-validator");
-const fs = require("fs");
-const path = require("path");
+const { uploadImage, deleteImage } = require("../util/cloudinary");
 const Book = require("../models/book");
 
 exports.getBooks = (req, res, next) => {
@@ -55,18 +54,20 @@ exports.createBook = (req, res, next) => {
     const authorName = req.body.authorName;
     const price = req.body.price;
     const description = req.body.description;
-    const imageUrl = req.file.path;
 
-    const book = new Book({
-        title: title,
-        authorName: authorName,
-        price: price,
-        description: description,
-        imageUrl: imageUrl,
-        createdBy: req.userId,
-    });
-    return book
-        .save()
+    uploadImage(req.file.buffer)
+        .then((uploaded) => {
+            const book = new Book({
+                title: title,
+                authorName: authorName,
+                price: price,
+                description: description,
+                imageUrl: uploaded.secure_url,
+                imagePublicId: uploaded.public_id,
+                createdBy: req.userId,
+            });
+            return book.save();
+        })
         .then((result) => {
             res.status(201).json({
                 message: "Book created successfully",
@@ -80,6 +81,7 @@ exports.createBook = (req, res, next) => {
             next(err);
         });
 };
+
 exports.singleBook = (req, res, next) => {
     const id = req.params.id;
 
@@ -132,16 +134,28 @@ exports.editBook = (req, res, next) => {
                 throw error;
             }
 
-            if (req.file) {
-                clearImage(book.imageUrl);
-                book.imageUrl = req.file.path;
-            }
             book.title = title;
             book.description = description;
             book.authorName = authorName;
             book.price = price;
 
-            return book.save();
+            if (!req.file) {
+                return book.save();
+            }
+
+            // Upload the new cover first, save, then bin the old one —
+            // so a failed upload never destroys the existing image.
+            const previousPublicId = book.imagePublicId;
+            return uploadImage(req.file.buffer)
+                .then((uploaded) => {
+                    book.imageUrl = uploaded.secure_url;
+                    book.imagePublicId = uploaded.public_id;
+                    return book.save();
+                })
+                .then((saved) => {
+                    deleteImage(previousPublicId);
+                    return saved;
+                });
         })
         .then((result) => {
             res.status(200).json({
@@ -173,8 +187,8 @@ exports.deleteBook = (req, res, next) => {
                 throw error;
             }
 
-            clearImage(book.imageUrl);
-            return book.deleteOne();
+            const publicId = book.imagePublicId;
+            return book.deleteOne().then(() => deleteImage(publicId));
         })
         .then(() => {
             res.status(200).json({
@@ -187,13 +201,4 @@ exports.deleteBook = (req, res, next) => {
             }
             next(err);
         });
-};
-
-const clearImage = (filePath) => {
-    filePath = path.join(__dirname, "..", filePath);
-    fs.unlink(filePath, (err) => {
-        if (err) {
-            console.log("Failed to delete old image:", err);
-        }
-    });
 };

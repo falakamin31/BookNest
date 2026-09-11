@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { ConfirmDialog } from "../common";
-import { API } from "../../config";
+import { API, imageSrc } from "../../config";
 
 const BookCard = ({ book, onDelete, index = 0 }) => {
     const { user } = useAuth();
@@ -57,7 +57,7 @@ const BookCard = ({ book, onDelete, index = 0 }) => {
                         </div>
                     ) : (
                         <img
-                            src={`${API}/${book.imageUrl}`}
+                            src={imageSrc(book.imageUrl)}
                             alt={book.title}
                             loading="lazy"
                             onError={() => setImgFailed(true)}
